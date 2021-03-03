@@ -1,45 +1,93 @@
 version: '3.2'
 
 services:
-  elasticsearch:
+  es01:
     build:
       context: elasticsearch/
       args:
         ELK_VERSION: $ELK_VERSION
+    container_name: es01
+    hostname: es01
     volumes:
-      - type: bind
-        source: ./elasticsearch/config/elasticsearch.yml
-        target: /usr/share/elasticsearch/config/elasticsearch.yml
-        read_only: true
-      - type: volume
-        source: elasticsearch
-        target: /usr/share/elasticsearch/data
+      - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+      - ./elasticsearch/data/es01:/usr/share/elasticsearch/data:rw
     ports:
       - "9200:9200"
-      - "9300:9300"
     environment:
-      ES_JAVA_OPTS: "-Xmx256m -Xms256m"
-      ELASTIC_PASSWORD: changeme
-      # Use single node discovery in order to disable production mode and avoid bootstrap checks.
-      # see: https://www.elastic.co/guide/en/elasticsearch/reference/current/bootstrap-checks.html
-      discovery.type: single-node
+      - node.name=es01
+      - cluster.name=es-docker-cluster
+      - discovery.seed_hosts=es02,es03
+      - cluster.initial_master_nodes=es01,es02,es03
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - TZ=Asia/Shanghai 
+    ulimits: 
+      mem_limit: 
+        soft: -1
+        hard: -1
     networks:
       - elk
 
-  logstash:
+  es02:
+    build:
+      context: elasticsearch/
+      args:
+        ELK_VERSION: $ELK_VERSION
+    container_name: es02
+    hostname: es02
+    volumes:
+      - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+      - ./elasticsearch/data/es02:/usr/share/elasticsearch/data:rw
+    environment:
+      - node.name=es02
+      - cluster.name=es-docker-cluster
+      - discovery.seed_hosts=es01,es03
+      - cluster.initial_master_nodes=es01,es02,es03
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - TZ=Asia/Shanghai 
+    ulimits: 
+      mem_limit: 
+        soft: -1
+        hard: -1
+    networks:
+      - elk
+  
+  es03:
+    build:
+      context: elasticsearch/
+      args:
+        ELK_VERSION: $ELK_VERSION
+    container_name: es03
+    hostname: es03
+    volumes:
+      - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+      - ./elasticsearch/data/es03:/usr/share/elasticsearch/data:rw
+    environment:
+      - node.name=es03
+      - cluster.name=es-docker-cluster
+      - discovery.seed_hosts=es01,es02
+      - cluster.initial_master_nodes=es01,es02
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - TZ=Asia/Shanghai 
+    ulimits: 
+      mem_limit: 
+        soft: -1
+        hard: -1
+    networks:
+      - elk
+
+  lst01:
     build:
       context: logstash/
       args:
         ELK_VERSION: $ELK_VERSION
+    container_name: lst01
+    hostname: lst01
     volumes:
-      - type: bind
-        source: ./logstash/config/logstash.yml
-        target: /usr/share/logstash/config/logstash.yml
-        read_only: true
-      - type: bind
-        source: ./logstash/pipeline
-        target: /usr/share/logstash/pipeline
-        read_only: true
+      - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+      - ./logstash/pipeline:/usr/share/logstash/pipeline:ro
     ports:
       - "5044:5044"
       - "5000:5000/tcp"
@@ -47,31 +95,34 @@ services:
       - "9600:9600"
     environment:
       LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+      TZ: Asia/Shanghai 
     networks:
       - elk
     depends_on:
-      - elasticsearch
+      - es01
+      - es02
+      - es03
 
-  kibana:
+  kib01:
     build:
       context: kibana/
       args:
         ELK_VERSION: $ELK_VERSION
+    container_name: kib01
+    hostname: kib01
     volumes:
-      - type: bind
-        source: ./kibana/config/kibana.yml
-        target: /usr/share/kibana/config/kibana.yml
-        read_only: true
+      - ./kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
     ports:
       - "5601:5601"
+    environment: 
+      - TZ=Asia/Shanghai
     networks:
       - elk
     depends_on:
-      - elasticsearch
+      - es01
+      - es02
+      - es03
 
 networks:
   elk:
     driver: bridge
-
-volumes:
-  elasticsearch:
