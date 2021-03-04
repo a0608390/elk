@@ -10,7 +10,7 @@ services:
     hostname: es01
     volumes:
       - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
-      - ./elasticsearch/data/es01:/usr/share/elasticsearch/data:rw
+      - /elk/elasticsearch/data/es01:/usr/share/elasticsearch/data:rw
     ports:
       - "9200:9200"
     environment:
@@ -38,7 +38,7 @@ services:
     hostname: es02
     volumes:
       - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
-      - ./elasticsearch/data/es02:/usr/share/elasticsearch/data:rw
+      - /elk/elasticsearch/data/es02:/usr/share/elasticsearch/data:rw
     environment:
       - node.name=es02
       - cluster.name=es-docker-cluster
@@ -64,7 +64,7 @@ services:
     hostname: es03
     volumes:
       - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
-      - ./elasticsearch/data/es03:/usr/share/elasticsearch/data:rw
+      - /elk/elasticsearch/data/es03:/usr/share/elasticsearch/data:rw
     environment:
       - node.name=es03
       - cluster.name=es-docker-cluster
