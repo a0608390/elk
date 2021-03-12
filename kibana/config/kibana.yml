@@ -4,12 +4,28 @@
 #
 server.name: kib01
 server.host: 0.0.0.0
-elasticsearch.hosts: [ "http://es01:9200","http://es02:9200","http://es03:9200" ]
+elasticsearch.hosts: ["https://es01:9200","https://es02:9200","https://es03:9200" ]
 monitoring.ui.container.elasticsearch.enabled: true
 
 i18n.locale: "zh-CN"  # 中文
 
 ## X-Pack security credentials
-#
-elasticsearch.username: elastic
-elasticsearch.password: changeme
+# 配置连接ES
+xpack.security.enabled: true
+# elasticsearch.ssl.verificationMode: certificate   #不验证主机名
+# elasticsearch.ssl.certificate: /usr/share/kibana/config/client.cer    #指定证书
+# elasticsearch.ssl.key: /usr/share/kibana/config/client.key    #指定私钥
+# elasticsearch.ssl.certificateAuthorities: ["/usr/share/kibana/config/client-ca.cer"]    #指定受信任的公共证书
+# elasticsearch.ssl.keystore.path: "/usr/share/kibana/config/kib01.p12"
+elasticsearch.ssl.truststore.path: "/usr/share/kibana/config/kib01.p12"
+elasticsearch.ssl.truststore.password: ""             #可以指定证书的key
+elasticsearch.username: "elastic"
+elasticsearch.password: "admin#123"
+
+
+# 使用https访问kibana
+server.ssl.enabled: true
+# server.ssl.certificate: /usr/share/kibana/config/client.cer
+# server.ssl.key: /usr/share/kibana/config/client.key
+server.ssl.keystore.path: "/usr/share/kibana/config/kib01.p12"
+server.ssl.keystore.password: ""

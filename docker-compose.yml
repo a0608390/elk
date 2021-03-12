@@ -10,6 +10,7 @@ services:
     hostname: es01
     volumes:
       - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+      - ./elasticsearch/config/es-cluster.p12:/usr/share/elasticsearch/config/es-cluster.p12:ro
       - /elk/elasticsearch/data/es01:/usr/share/elasticsearch/data:rw
     ports:
       - "9200:9200"
@@ -20,7 +21,7 @@ services:
       - cluster.initial_master_nodes=es01,es02,es03
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-      - ELASTIC_PASSWORD=changeme
+      - ELASTIC_PASSWORD=admin#123
       - TZ=Asia/Shanghai 
     ulimits: 
       memlock: 
@@ -38,6 +39,7 @@ services:
     hostname: es02
     volumes:
       - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+      - ./elasticsearch/config/es-cluster.p12:/usr/share/elasticsearch/config/es-cluster.p12:ro
       - /elk/elasticsearch/data/es02:/usr/share/elasticsearch/data:rw
     environment:
       - node.name=es02
@@ -46,7 +48,7 @@ services:
       - cluster.initial_master_nodes=es01,es02,es03
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-      - ELASTIC_PASSWORD=changeme
+      - ELASTIC_PASSWORD=admin#123
       - TZ=Asia/Shanghai 
     ulimits: 
       memlock: 
@@ -64,6 +66,7 @@ services:
     hostname: es03
     volumes:
       - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+      - ./elasticsearch/config/es-cluster.p12:/usr/share/elasticsearch/config/es-cluster.p12:ro
       - /elk/elasticsearch/data/es03:/usr/share/elasticsearch/data:rw
     environment:
       - node.name=es03
@@ -72,7 +75,7 @@ services:
       - cluster.initial_master_nodes=es01,es02
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-      - ELASTIC_PASSWORD=changeme
+      - ELASTIC_PASSWORD=admin#123
       - TZ=Asia/Shanghai 
     ulimits: 
       memlock: 
@@ -90,14 +93,14 @@ services:
     hostname: lst01
     volumes:
       - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
-      - ./logstash/pipeline:/usr/share/logstash/pipeline:ro
+      - ./logstash/config/lst01.p12:/usr/share/logstash/config/lst01.p12:ro
+      - ./logstash/pipeline:/usr/share/logstash/pipeline:rw
     ports:
-      - "5044:5044"
-      - "5000:5000/tcp"
-      - "5000:5000/udp"
+      - "514:5000/tcp"
+      - "514:5000/udp"
       - "9600:9600"
     environment:
-      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+      LS_JAVA_OPTS: "-Xmx512m -Xms512m"
       TZ: Asia/Shanghai 
     networks:
       - elk
@@ -115,6 +118,7 @@ services:
     hostname: kib01
     volumes:
       - ./kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
+      - ./kibana/config/kib01.p12:/usr/share/kibana/config/kib01.p12:ro
     ports:
       - "5600:5601"
     environment: 
